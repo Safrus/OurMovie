@@ -1,8 +1,7 @@
 package com.example.ourmovie
 
-import android.telecom.Call
 import android.util.Log
-import com.example.movieapp.Responses.MovieResponse
+import com.example.ourmovie.responses.MovieResponse
 import com.google.gson.JsonObject
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

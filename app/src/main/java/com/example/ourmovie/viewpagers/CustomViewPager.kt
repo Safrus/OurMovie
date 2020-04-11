@@ -1,4 +1,4 @@
-package com.example.movieapp.ViewPager
+package com.example.ourmovie.viewpagers
 
 import android.content.Context
 import android.util.AttributeSet

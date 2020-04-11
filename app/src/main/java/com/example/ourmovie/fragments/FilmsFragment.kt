@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
-import com.example.movieapp.Responses.Movie
-import com.example.movieapp.Responses.MovieResponse
+import com.example.ourmovie.Movie
+import com.example.ourmovie.responses.MovieResponse
 import com.example.ourmovie.R
 import com.example.ourmovie.RetrofitService
 import com.example.ourmovie.activities.MovieDetailActivity

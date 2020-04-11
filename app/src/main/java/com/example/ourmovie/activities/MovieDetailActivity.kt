@@ -6,7 +6,7 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import com.bumptech.glide.Glide
-import com.example.movieapp.Responses.Movie
+import com.example.ourmovie.Movie
 import com.example.ourmovie.R
 import com.example.ourmovie.RetrofitService
 import com.example.ourmovie.responses.FavoriteResponse

@@ -1,6 +1,6 @@
 package com.example.ourmovie.user
 
-import com.example.movieapp.Responses.Movie
+import com.example.ourmovie.Movie
 import com.example.ourmovie.responses.AccountResponse
 
 class CurrentUser {
