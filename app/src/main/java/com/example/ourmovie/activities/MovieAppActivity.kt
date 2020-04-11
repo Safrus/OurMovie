@@ -8,8 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.viewpager.widget.PagerAdapter
-import com.example.movieapp.Adapters.ViewPagerAdpaters.SlidePagerAdapter
-import com.example.movieapp.ViewPager.CustomViewPager
+import com.example.ourmovie.viewpagers.SlidePagerAdapter
+import com.example.ourmovie.viewpagers.CustomViewPager
 import com.example.ourmovie.fragments.FavoriteMoviesFragment
 import com.example.ourmovie.fragments.FilmsFragment
 import com.example.ourmovie.fragments.ProfileFragment

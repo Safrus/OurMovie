@@ -1,4 +1,4 @@
-package com.example.ourmovie.Responses
+package com.example.ourmovie
 
 import com.google.gson.annotations.SerializedName
 

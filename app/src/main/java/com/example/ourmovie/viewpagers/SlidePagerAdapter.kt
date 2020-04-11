@@ -1,4 +1,4 @@
-package com.example.movieapp.Adapters.ViewPagerAdpaters
+package com.example.ourmovie.viewpagers
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager

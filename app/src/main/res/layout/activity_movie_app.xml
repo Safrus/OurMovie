@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     tools:context=".activities.MovieAppActivity">
 
-    <com.example.movieapp.ViewPager.CustomViewPager
+    <com.example.ourmovie.viewpagers.CustomViewPager
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
