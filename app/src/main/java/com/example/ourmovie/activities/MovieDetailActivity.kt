@@ -13,11 +13,16 @@ import com.example.ourmovie.responses.FavoriteResponse
 import com.example.ourmovie.user.CurrentUser
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.coroutines.CoroutineContext
 
-class MovieDetailActivity:AppCompatActivity(){
+class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
 
     private lateinit var progressBar: ProgressBar
     private lateinit var tvTitle: TextView
@@ -30,6 +35,11 @@ class MovieDetailActivity:AppCompatActivity(){
     private lateinit var tvOverviewText:TextView
     private lateinit var ivLike:ImageView
     private var isFavorite = false
+
+    private val job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     val baseImageUrl:String = "https://image.tmdb.org/t/p/w500"
 
@@ -50,14 +60,21 @@ class MovieDetailActivity:AppCompatActivity(){
 
         val movieId = intent.getIntExtra("movie_id", 1)
 
-        getMovie(id = movieId)
+        //getMovie(id = movieId)
+
+        getMovieCoroutine(id = movieId)
 
         val goBack: ImageButton = findViewById(R.id.back)
 
         goBack.setOnClickListener({ finish() })
     }
 
-    private fun getMovie(id: Int){
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
+
+    private fun getMovie(id: Int) {
 
         RetrofitService.getMovieApi()
             .getMovieById(id, RetrofitService.getApiKey()).enqueue(object :
@@ -141,11 +158,85 @@ class MovieDetailActivity:AppCompatActivity(){
             })
     }
 
-   fun markFavorite(body: JsonObject){
+    private fun getMovieCoroutine(id: Int) {
+        launch {
+            val response = RetrofitService.getMovieApi().getMovieByIdCoroutine(id, RetrofitService.getApiKey())
+            if (response.isSuccessful) {
+                progressBar.visibility = View.GONE
+                var gson = Gson()
+                Log.d("My_movie", response.body().toString())
+                val movie: Movie = gson.fromJson(response.body(), Movie::class.java)
+                if (movie != null) {
+                    tvTitle.text = movie.title
+                    tvRating.text = "Rating"
+                    tvRatingText.text = movie.rating.toString() + " / 10"
+                    tvRuntime.text = "Runtime"
+                    tvRuntimeText.text = movie.runtime.toString() + " minutes"
+                    tvOverviewText.text = movie.overview
+
+                    for(fm in CurrentUser.favoritList!!) {
+                        if (movie.title.equals(fm.title)) {
+                            isFavorite = true
+                        }
+                    }
+
+                    if (isFavorite) {
+                        Glide.with(this@MovieDetailActivity)
+                            .load(R.drawable.redlike)
+                            .into(ivLike)
+                    } else {
+                        Glide.with(this@MovieDetailActivity)
+                            .load(R.drawable.like)
+                            .into(ivLike)
+                    }
+
+                    if (movie.posterPath != null) {
+                        Glide.with(this@MovieDetailActivity)
+                            .load(baseImageUrl + movie.posterPath)
+                            .into(ivMoviePoster)
+                    }
+
+                    ivLike.setOnClickListener(){
+                        if (isFavorite) {
+                            val body = JsonObject().apply {
+                                addProperty("media_type", "movie")
+                                addProperty("media_id", movie.movieId)
+                                addProperty("favorite", false)
+                            }
+
+                            Glide.with(this@MovieDetailActivity)
+                                .load(R.drawable.like)
+                                .into(ivLike)
+
+                            markFavorite(body)
+                        } else {
+                            val body = JsonObject().apply {
+                                addProperty("media_type", "movie")
+                                addProperty("media_id", movie.movieId)
+                                addProperty("favorite", true)
+                            }
+
+                            Glide.with(this@MovieDetailActivity)
+                                .load(R.drawable.redlike)
+                                .into(ivLike)
+
+                            markFavoriteCoroutine(body)
+                        }
+
+                    }
+                }
+            } else {
+                progressBar.visibility = View.GONE
+                Toast.makeText(this@MovieDetailActivity, "Error", Toast.LENGTH_SHORT)
+            }
+        }
+    }
+
+   private fun markFavorite(body: JsonObject) {
         var favResponse: FavoriteResponse?
         RetrofitService.getMovieApi().markAsFavorite(
-            CurrentUser.user!!.account_id,
-            RetrofitService.getApiKey(), CurrentUser.user!!.sessionId.toString(),body).enqueue(object :
+            CurrentUser.user!!.accountId,
+            RetrofitService.getApiKey(), CurrentUser.user!!.sessionId.toString(), body).enqueue(object :
             Callback<JsonObject> {
             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
                 TODO("not implemented")
@@ -153,16 +244,32 @@ class MovieDetailActivity:AppCompatActivity(){
 
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                 var gson = Gson()
-                favResponse= gson.fromJson(response.body(), FavoriteResponse::class.java)
-                if(favResponse!=null){
+                favResponse = gson.fromJson(response.body(), FavoriteResponse::class.java)
+                if (favResponse != null) {
                     notify(favResponse!!)
                 }
             }
         })
     }
 
+    private fun markFavoriteCoroutine(body: JsonObject) {
+        launch {
+            var favResponse: FavoriteResponse?
+            val response = RetrofitService.getMovieApi().markAsFavoriteCoroutine(CurrentUser.user!!.accountId, RetrofitService.getApiKey(), CurrentUser.user!!.sessionId.toString(), body)
+            if (response.isSuccessful) {
+                var gson = Gson()
+                favResponse = gson.fromJson(response.body(), FavoriteResponse::class.java)
+                if (favResponse != null) {
+                    notify(favResponse!!)
+                }
+            } else {
+                Toast.makeText(this@MovieDetailActivity, "Error", Toast.LENGTH_SHORT)
+            }
+        }
+    }
+
     private fun notify(favResponse: FavoriteResponse){
-        val status_code = favResponse!!.status_code
+        val status_code = favResponse!!.statusCode
         if(status_code==0){
             Toast.makeText(this, favResponse.toString(), Toast.LENGTH_SHORT).show()
         }

@@ -16,14 +16,24 @@ import com.example.ourmovie.RetrofitService
 import com.example.ourmovie.activities.LoginActivity
 import com.example.ourmovie.user.CurrentUser
 import com.google.gson.JsonObject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.coroutines.CoroutineContext
 
-class ProfileFragment: Fragment(){
+class ProfileFragment: Fragment(), CoroutineScope {
 
     private lateinit var userName: TextView
     private lateinit var logOutBtn: Button
+
+    private val job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,27 +50,48 @@ class ProfileFragment: Fragment(){
                 addProperty("session_id", CurrentUser.user!!.sessionId)
             }
 
-            RetrofitService.getMovieApi()
-                .deleteSession(RetrofitService.getApiKey(),body).enqueue(object :
-                    Callback<JsonObject> {
-                    override fun onFailure(call: Call<JsonObject>, t: Throwable) {
-                        TODO("not implemented")
-                    }
-                    override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
-                        if(response.isSuccessful){
-                            sayGoodBye()
-                        }
-                    }
-                })
+            deleteSessionCoroutine(body)
+
         }
         return view
     }
-    
-    fun sayGoodBye(){
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
+
+    private fun deleteSession(body: JsonObject) {
+        RetrofitService.getMovieApi()
+            .deleteSession(RetrofitService.getApiKey(),body).enqueue(object :
+                Callback<JsonObject> {
+                override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                    TODO("not implemented")
+                }
+                override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                    if(response.isSuccessful){
+                        sayGoodBye()
+                    }
+                }
+            })
+    }
+
+    private fun deleteSessionCoroutine(body: JsonObject) {
+        launch {
+            val response = RetrofitService.getMovieApi().deleteSessionCoroutine(RetrofitService.getApiKey(), body)
+            if (response.isSuccessful) {
+                sayGoodBye()
+            } else {
+                Toast.makeText(activity, "Error", Toast.LENGTH_SHORT)
+            }
+        }
+    }
+
+    private fun sayGoodBye(){
         val intent = Intent(this.activity, LoginActivity::class.java)
         val sharedPreference: SharedPreferences =  this.activity!!.getSharedPreferences("CURRENT_USER", Context.MODE_PRIVATE)
         sharedPreference.edit().remove("currentUser").commit()
-        Toast.makeText(this.context, "GoodBye, " + CurrentUser.user!!.userName+"!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this.context, "GoodBye, " + CurrentUser.user!!.userName + "!", Toast.LENGTH_SHORT).show()
         startActivity(intent)
     }
 }

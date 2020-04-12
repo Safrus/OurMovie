@@ -6,6 +6,6 @@ import com.example.ourmovie.responses.AccountResponse
 class CurrentUser {
     companion object {
         var user: AccountResponse? = null
-        var favoritList:List<Movie>?=null
+        var favoritList: List<Movie>? = null
     }
 }
