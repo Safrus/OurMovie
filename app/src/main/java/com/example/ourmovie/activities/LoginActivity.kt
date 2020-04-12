@@ -20,18 +20,26 @@ import com.example.ourmovie.responses.SessionResponse
 import com.example.ourmovie.user.CurrentUser
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.lang.reflect.Type
+import kotlin.coroutines.CoroutineContext
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : AppCompatActivity(), CoroutineScope {
 
     lateinit var loginBtn: Button
     lateinit var login: EditText
     lateinit var password: EditText
     lateinit var progressBar: ProgressBar
+
+    private val job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,12 +53,16 @@ class LoginActivity : AppCompatActivity() {
 
             val userLogin:String = login.text.toString().trim()
             val userPassword:String = password.text.toString().trim()
-            login(userLogin, userPassword)
-
+            loginCoroutine(userLogin, userPassword)
         }
     }
 
-    fun login(username: String, password: String){
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
+
+    private fun login(username: String, password: String){
         var requestTokenResponse: Token?
         progressBar.visibility = View.VISIBLE
         RetrofitService.getMovieApi()
@@ -64,30 +76,49 @@ class LoginActivity : AppCompatActivity() {
                     var gson = Gson()
                     Log.d("My_token_response", response.body().toString())
                     if (response.isSuccessful) {
-                        val type: Type = object : TypeToken<Token>() {}.type
-                        requestTokenResponse= gson.fromJson(response.body(), Token::class.java)
+                        requestTokenResponse = gson.fromJson(response.body(), Token::class.java)
 
-                        if(requestTokenResponse!=null){
-                            val request_token: String? = requestTokenResponse!!.request_token
-                            val body = JsonObject().apply{
+                        if (requestTokenResponse != null) {
+                            val requestToken: String? = requestTokenResponse!!.requestToken
+                            val body = JsonObject().apply {
                                 addProperty("username",username)
                                 addProperty("password",password)
-                                addProperty("request_token",request_token)
+                                addProperty("request_token",requestToken)
                             }
                             getLoginResponse(body)
-
                         }
                     }
                 }
-
-
-
             })
-
     }
 
-    fun getLoginResponse(body: JsonObject){
-        var logRseponse: LoginResponse?
+    private fun loginCoroutine(username: String, password: String) {
+        launch {
+            var requestTokenResponse: Token?
+            progressBar.visibility = View.VISIBLE
+            val response = RetrofitService.getMovieApi().getNewTokenCoroutine(RetrofitService.getApiKey())
+            if (response.isSuccessful) {
+                Log.d("My_token_response", response.body().toString())
+                var gson = Gson()
+                requestTokenResponse = gson.fromJson(response.body(), Token::class.java)
+                if (requestTokenResponse != null) {
+                    val requestToken: String? = requestTokenResponse!!.requestToken
+                    val body = JsonObject().apply {
+                        addProperty("username",username)
+                        addProperty("password",password)
+                        addProperty("request_token",requestToken)
+                    }
+                    getLoginResponseCoroutine(body)
+                }
+            } else {
+                Log.d("My_token_failure", response.body().toString())
+                Toast.makeText(this@LoginActivity, "Error", Toast.LENGTH_SHORT)
+            }
+        }
+    }
+
+    private fun getLoginResponse(body: JsonObject) {
+        var loginResponse: LoginResponse?
         RetrofitService.getMovieApi()
             .login(RetrofitService.getApiKey(),body).enqueue(object :
                 Callback<JsonObject> {
@@ -97,17 +128,16 @@ class LoginActivity : AppCompatActivity() {
 
                 override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                     var gson = Gson()
-                    if(response.isSuccessful){
-                        logRseponse= gson.fromJson(response.body(), LoginResponse::class.java)
+                    if (response.isSuccessful) {
+                        loginResponse = gson.fromJson(response.body(), LoginResponse::class.java)
 
-                        if (logRseponse!=null){
-                            val body = JsonObject().apply{
-                                addProperty("request_token",logRseponse!!.request_token.toString())
+                        if (loginResponse != null) {
+                            val body = JsonObject().apply {
+                                addProperty("request_token",loginResponse!!.requestToken.toString())
                             }
                             getSession(body)
                         }
-                    }
-                    else{
+                    } else {
                         val error = "Incorrect login or password!"
                         showError(error)
                     }
@@ -116,35 +146,73 @@ class LoginActivity : AppCompatActivity() {
             })
     }
 
-    fun showError(error:String){
+    private fun getLoginResponseCoroutine(body: JsonObject) {
+        launch {
+            var loginResponse: LoginResponse?
+            val response = RetrofitService.getMovieApi().loginCoroutine(RetrofitService.getApiKey(), body)
+            if (response.isSuccessful) {
+                var gson = Gson()
+                loginResponse = gson.fromJson(response.body(), LoginResponse::class.java)
+                if (loginResponse != null) {
+                    val body = JsonObject().apply{
+                        addProperty("request_token",loginResponse!!.requestToken.toString())
+                    }
+                    getSessionCoroutine(body)
+                } else {
+                    val error = "Incorrect login or password"
+                    showError(error)
+                }
+            } else {
+                Toast.makeText(this@LoginActivity, "Error", Toast.LENGTH_SHORT)
+            }
+        }
+    }
+
+    private fun showError(error:String){
         progressBar.visibility = View.INVISIBLE
         Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
     }
 
-    fun getSession(body: JsonObject){
+    private fun getSession(body: JsonObject) {
         var session: SessionResponse?
         RetrofitService.getMovieApi()
-            .getSession(RetrofitService.getApiKey(),body).enqueue(object :
+            .getSession(RetrofitService.getApiKey(), body).enqueue(object :
                 Callback<JsonObject> {
                 override fun onFailure(call: Call<JsonObject>, t: Throwable) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                    TODO("not implemented")
                 }
 
                 override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                     var gson = Gson()
                     if(response.isSuccessful) {
-                        val type: Type = object : TypeToken<SessionResponse>() {}.type
                         session = gson.fromJson(response.body(), SessionResponse::class.java)
                         if (session != null) {
-                            val session_id = session!!.session_id
-                            getAccount(session_id)
+                            val session_id = session!!.sessionId
+                            getAccountCoroutine(session_id)
                         }
                     }
                 }
             })
     }
 
-    fun getAccount(session:String?){
+    private fun getSessionCoroutine(body: JsonObject) {
+        launch {
+            var session: SessionResponse?
+            val response = RetrofitService.getMovieApi().getSessionCoroutine(RetrofitService.getApiKey(), body)
+            if (response.isSuccessful) {
+                var gson = Gson()
+                session = gson.fromJson(response.body(), SessionResponse::class.java)
+                if (session != null) {
+                    val sessionId = session!!.sessionId
+                    getAccountCoroutine(sessionId)
+                } else {
+                    Toast.makeText(this@LoginActivity, "Error", Toast.LENGTH_SHORT)
+                }
+            }
+        }
+    }
+
+    private fun getAccount(session: String?) {
         Toast.makeText(this, "Loading......", Toast.LENGTH_SHORT).show()
 
         var accountResponse: AccountResponse?
@@ -159,9 +227,9 @@ class LoginActivity : AppCompatActivity() {
                 override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                     var gson = Gson()
                     if (response.isSuccessful) {
-                        accountResponse= gson.fromJson(response.body(), AccountResponse::class.java)
-                        if(accountResponse!=null){
-                            showWelcome(accountResponse!!,session)
+                        accountResponse = gson.fromJson(response.body(), AccountResponse::class.java)
+                        if (accountResponse != null) {
+                            showWelcome(accountResponse!!, session)
                         }
                     }
                 }
@@ -170,22 +238,40 @@ class LoginActivity : AppCompatActivity() {
 
     }
 
-    fun showWelcome(user: AccountResponse, session:String?){
+    private fun getAccountCoroutine(session: String?) {
+        launch {
+            Toast.makeText(this@LoginActivity, "Loading......", Toast.LENGTH_SHORT).show()
+            var accountResponse: AccountResponse?
+            val response = RetrofitService.getMovieApi().getAccountCoroutine(RetrofitService.getApiKey(), session!!)
+            if (response.isSuccessful) {
+                var gson = Gson()
+                accountResponse = gson.fromJson(response.body(), AccountResponse::class.java)
+                if (accountResponse != null) {
+                    showWelcome(accountResponse!!, session)
+                }
+            } else {
+                Log.d("My_token_failure", response.body().toString())
+                Toast.makeText(this@LoginActivity, "Error", Toast.LENGTH_SHORT)
+            }
+        }
+    }
+
+    private fun showWelcome(user: AccountResponse, session:String?) {
         progressBar.visibility = View.GONE
         CurrentUser.user = user
         CurrentUser.user!!.sessionId  = session;
-        saveSessionOftheCurrentUser()
+        saveSessionOfTheCurrentUser()
         val intent = Intent(this, MovieAppActivity::class.java)
         Toast.makeText(this, "Glad to see you, " + CurrentUser.user!!.userName, Toast.LENGTH_SHORT).show()
         startActivity(intent)
     }
 
-    fun saveSessionOftheCurrentUser(){
+    private fun saveSessionOfTheCurrentUser(){
         val currUserSharedPreference: SharedPreferences =  this!!.getSharedPreferences("CURRENT_USER", Context.MODE_PRIVATE)
         var currUserEditor = currUserSharedPreference.edit()
         val gson = Gson()
         val json:String = gson!!.toJson(CurrentUser.user)
-        currUserEditor.putString("currentUser",json)
+        currUserEditor.putString("currentUser", json)
         currUserEditor.commit()
     }
 }

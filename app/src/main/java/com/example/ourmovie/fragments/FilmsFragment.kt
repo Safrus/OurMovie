@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,14 +19,25 @@ import com.example.ourmovie.R
 import com.example.ourmovie.RetrofitService
 import com.example.ourmovie.activities.MovieDetailActivity
 import com.example.ourmovie.adapters.MovieAdapter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.coroutines.CoroutineContext
 
-class FilmsFragment: Fragment() , MovieAdapter.RecyclerViewItemClick{
+class FilmsFragment: Fragment(), MovieAdapter.RecyclerViewItemClick, CoroutineScope {
 
     lateinit var recyclerView: RecyclerView
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
+
+    private val job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
     private var movieAdapter: MovieAdapter? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -57,15 +69,19 @@ class FilmsFragment: Fragment() , MovieAdapter.RecyclerViewItemClick{
             getMovies()
         }
 
-        movieAdapter =
-            MovieAdapter(
-                itemClickListener = this
-            )
+        movieAdapter = MovieAdapter(itemClickListener = this)
         recyclerView.adapter = movieAdapter
 
-        getMovies()
+        //getMovies()
+
+        getMoviesCoroutine()
 
         return view
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
     }
 
     private fun getMovies() {
@@ -92,6 +108,22 @@ class FilmsFragment: Fragment() , MovieAdapter.RecyclerViewItemClick{
                 swipeRefreshLayout.isRefreshing = false
             }
         })
+    }
+
+    private fun getMoviesCoroutine() {
+        launch {
+            swipeRefreshLayout.isRefreshing = true
+            val response = RetrofitService.getMovieApi().getMovieListCoroutine(RetrofitService.getApiKey())
+            if (response.isSuccessful) {
+                Log.d("My_movie_list", response.body().toString())
+                val list = response.body()?.results
+                movieAdapter?.list = list
+                movieAdapter?.notifyDataSetChanged()
+            } else {
+                Toast.makeText(activity, "Error", Toast.LENGTH_SHORT)
+            }
+            swipeRefreshLayout.isRefreshing = false
+        }
     }
 
     override fun itemClick(position: Int, item: Movie) {

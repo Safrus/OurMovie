@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,16 +18,25 @@ import com.example.ourmovie.RetrofitService
 import com.example.ourmovie.activities.MovieDetailActivity
 import com.example.ourmovie.adapters.FavoriteMovieAdapter
 import com.example.ourmovie.user.CurrentUser
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.coroutines.CoroutineContext
 
-class FavoriteMoviesFragment: Fragment(),
-    FavoriteMovieAdapter.RecyclerViewItemClick {
+class FavoriteMoviesFragment: Fragment(), FavoriteMovieAdapter.RecyclerViewItemClick, CoroutineScope {
 
     lateinit var recyclerView: RecyclerView
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
     var favoriteMovieAdapter: FavoriteMovieAdapter? = null
+
+    private val job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,15 +61,20 @@ class FavoriteMoviesFragment: Fragment(),
             )
         recyclerView.adapter = favoriteMovieAdapter
 
-        getFavoriteMovies()
+        getFavoriteMoviesCoroutine()
 
         return view
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
     }
 
     private fun getFavoriteMovies() {
         swipeRefreshLayout.isRefreshing = true
         RetrofitService.getMovieApi().getFavoriteMovieList(
-            CurrentUser.user!!.account_id,
+            CurrentUser.user!!.accountId,
             RetrofitService.getApiKey(), CurrentUser.user!!.sessionId.toString()).enqueue(object :
             Callback<MovieResponse> {
 
@@ -84,6 +99,26 @@ class FavoriteMoviesFragment: Fragment(),
             }
         })
     }
+
+    private fun getFavoriteMoviesCoroutine() {
+        launch {
+            swipeRefreshLayout.isRefreshing = true
+            val response = RetrofitService.getMovieApi().getFavoriteMovieListCoroutine(CurrentUser.user!!.accountId, RetrofitService.getApiKey(), CurrentUser.user!!.sessionId.toString())
+            if (response.isSuccessful) {
+                Log.d("My_movie_list", response.body().toString())
+                var list: List<Movie>? = response.body()?.results
+                if (list != null) {
+                    CurrentUser.favoritList = list
+                }
+                favoriteMovieAdapter?.list = list
+                favoriteMovieAdapter?.notifyDataSetChanged()
+            } else {
+                Toast.makeText(activity, "Error", Toast.LENGTH_SHORT)
+            }
+            swipeRefreshLayout.isRefreshing = false
+        }
+    }
+
 
     override fun itemClick(position: Int, item: Movie) {
         val intent = Intent(this.activity, MovieDetailActivity::class.java)
