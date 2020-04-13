@@ -3,6 +3,7 @@ package com.example.ourmovie.activities
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -21,6 +22,8 @@ class MovieAppActivity: AppCompatActivity() {
     private var filmsFragment: Fragment = FilmsFragment()
     private var favoriteMoviesFragment: Fragment = FavoriteMoviesFragment()
     private var profileFragment: Fragment = ProfileFragment()
+    private var backPressedTime: Long = 0
+    private lateinit var backToast: Toast
 
     private var fragmentList: MutableList<Fragment> = ArrayList()
 
@@ -61,5 +64,17 @@ class MovieAppActivity: AppCompatActivity() {
         pager.setSwipable(false)
         pagerAdapter = SlidePagerAdapter(supportFragmentManager, fragmentList)
         pager.adapter = pagerAdapter
+    }
+
+    override fun onBackPressed() {
+        if (backPressedTime + 2000 > System.currentTimeMillis()) {
+            backToast.cancel()
+            super.onBackPressed()
+            return
+        } else {
+            backToast = Toast.makeText(this@MovieAppActivity, "Press back again to exit", Toast.LENGTH_SHORT)
+            backToast.show()
+        }
+        backPressedTime = System.currentTimeMillis()
     }
 }

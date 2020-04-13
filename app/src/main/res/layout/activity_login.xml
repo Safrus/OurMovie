@@ -23,10 +23,10 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:hint="Login"
-            android:textColor="#FF0505"
-            android:textColorHighlight="#FF0505"
-            android:textColorHint="#FF0505"
-            android:textColorLink="#FF0505" />
+            android:textColor="@color/colorAccent"
+            android:textColorHighlight="@color/colorAccent"
+            android:textColorHint="@color/colorAccent"
+            android:textColorLink="@color/colorAccent" />
 
         <EditText
             android:id="@+id/password"
@@ -36,16 +36,16 @@
             android:gravity="center"
             android:hint="Password"
             android:inputType="textPassword"
-            android:textColor="#FF0505"
-            android:textColorHighlight="#FF0505"
-            android:textColorHint="#FF0505"
-            android:textColorLink="#FF0505" />
+            android:textColor="@color/colorAccent"
+            android:textColorHighlight="@color/colorAccent"
+            android:textColorHint="@color/colorAccent"
+            android:textColorLink="@color/colorAccent" />
 
         <Button
             android:id="@+id/loginBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/rounded_button"
             android:text="Login"
             android:textColor="@color/design_default_color_background" />
@@ -65,12 +65,13 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="119dp"
-        android:layout_height="123dp"
+        android:layout_width="167dp"
+        android:layout_height="147dp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.457"
         app:srcCompat="@drawable/logokino" />
 
 

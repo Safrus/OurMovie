@@ -35,6 +35,8 @@ class LoginActivity: AppCompatActivity(), CoroutineScope {
     lateinit var login: EditText
     lateinit var password: EditText
     lateinit var progressBar: ProgressBar
+    private var backPressedTime: Long = 0
+    private lateinit var backToast: Toast
 
     private val job = Job()
 
@@ -59,6 +61,18 @@ class LoginActivity: AppCompatActivity(), CoroutineScope {
     override fun onDestroy() {
         super.onDestroy()
         job.cancel()
+    }
+
+    override fun onBackPressed() {
+        if (backPressedTime + 2000 > System.currentTimeMillis()) {
+            backToast.cancel()
+            super.onBackPressed()
+            return
+        } else {
+            backToast = Toast.makeText(this@LoginActivity, "Press back again to exit", Toast.LENGTH_SHORT)
+            backToast.show()
+        }
+        backPressedTime = System.currentTimeMillis()
     }
 
     /*
@@ -157,12 +171,10 @@ class LoginActivity: AppCompatActivity(), CoroutineScope {
                         addProperty("request_token", loginResponse!!.requestToken.toString())
                     }
                     getSessionCoroutine(body)
-                } else {
-                    val error = "Incorrect login or password"
-                    showError(error)
                 }
             } else {
-                Toast.makeText(this@LoginActivity, "Error", Toast.LENGTH_SHORT)
+                val error = "Incorrect login or password"
+                showError(error)
             }
         }
     }
@@ -265,6 +277,7 @@ class LoginActivity: AppCompatActivity(), CoroutineScope {
         saveSessionOfTheCurrentUser()
         val intent = Intent(this, MovieAppActivity::class.java)
         Toast.makeText(this, "Glad to see you, " + CurrentUser.user!!.userName, Toast.LENGTH_SHORT).show()
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
     }
 

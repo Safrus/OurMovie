@@ -91,6 +91,7 @@ class ProfileFragment: Fragment(), CoroutineScope {
         val sharedPreference: SharedPreferences = this.activity!!.getSharedPreferences("CURRENT_USER", Context.MODE_PRIVATE)
         sharedPreference.edit().remove("currentUser").commit()
         Toast.makeText(this.context, "GoodBye, " + CurrentUser.user!!.userName + "!", Toast.LENGTH_SHORT).show()
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
     }
 }

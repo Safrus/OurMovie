@@ -3,26 +3,22 @@ package com.example.ourmovie.activities
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.example.ourmovie.R
 import com.example.ourmovie.RetrofitService
 import com.example.ourmovie.responses.AccountResponse
 import com.example.ourmovie.user.CurrentUser
 import com.google.gson.Gson
-import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.lang.reflect.Type
 import kotlin.coroutines.CoroutineContext
 
@@ -49,6 +45,7 @@ class MainActivity: AppCompatActivity(), CoroutineScope {
             getAccountCoroutine(CurrentUser.user!!.sessionId.toString())
         } else {
             val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intent)
         }
         progressBar = findViewById(R.id.progressBar)
@@ -113,11 +110,13 @@ class MainActivity: AppCompatActivity(), CoroutineScope {
         CurrentUser.user = user
         CurrentUser.user!!.sessionId  = session
         val intent = Intent(this, MovieAppActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
     }
 
     private fun login() {
         val intent = Intent(this, MovieAppActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
     }
 }
