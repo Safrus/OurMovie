@@ -46,19 +46,15 @@ class FavoriteMoviesFragment: Fragment(), FavoriteMovieAdapter.RecyclerViewItemC
         var view: View = inflater!!.inflate(R.layout.fav_movies_fragment, container, false)
         recyclerView = view.findViewById(R.id.favoriteRecyclerView)
 
-        recyclerView.layoutManager =
-            LinearLayoutManager(this.activity, LinearLayoutManager.VERTICAL, false)
+        recyclerView.layoutManager = LinearLayoutManager(this.activity, LinearLayoutManager.VERTICAL, false)
 
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
         swipeRefreshLayout.setOnRefreshListener {
             favoriteMovieAdapter?.clearAll()
-            getFavoriteMovies()
+            getFavoriteMoviesCoroutine()
         }
 
-        favoriteMovieAdapter =
-            FavoriteMovieAdapter(
-                itemClickListener = this
-            )
+        favoriteMovieAdapter = FavoriteMovieAdapter(itemClickListener = this)
         recyclerView.adapter = favoriteMovieAdapter
 
         getFavoriteMoviesCoroutine()
@@ -71,17 +67,15 @@ class FavoriteMoviesFragment: Fragment(), FavoriteMovieAdapter.RecyclerViewItemC
         job.cancel()
     }
 
+    /*
     private fun getFavoriteMovies() {
         swipeRefreshLayout.isRefreshing = true
         RetrofitService.getMovieApi().getFavoriteMovieList(
-            CurrentUser.user!!.accountId,
-            RetrofitService.getApiKey(), CurrentUser.user!!.sessionId.toString()).enqueue(object :
+            CurrentUser.user!!.accountId, RetrofitService.getApiKey(), CurrentUser.user!!.sessionId.toString()).enqueue(object :
             Callback<MovieResponse> {
-
             override fun onFailure(call: Call<MovieResponse>, t: Throwable) {
                 swipeRefreshLayout.isRefreshing = false
             }
-
             override fun onResponse(
                 call: Call<MovieResponse>,
                 response: Response<MovieResponse>
@@ -99,6 +93,7 @@ class FavoriteMoviesFragment: Fragment(), FavoriteMovieAdapter.RecyclerViewItemC
             }
         })
     }
+     */
 
     private fun getFavoriteMoviesCoroutine() {
         launch {

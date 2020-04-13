@@ -40,18 +40,15 @@ class ProfileFragment: Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        var view: View = inflater!!.inflate(R.layout.profile_fragment,container,false)
+        var view: View = inflater!!.inflate(R.layout.profile_fragment, container, false)
         userName = view.findViewById(R.id.userName)
         logOutBtn = view.findViewById(R.id.logOutBtn)
         userName.text = CurrentUser.user?.userName
-        logOutBtn.setOnClickListener(){
-
-            val body = JsonObject().apply{
+        logOutBtn.setOnClickListener {
+            val body = JsonObject().apply {
                 addProperty("session_id", CurrentUser.user!!.sessionId)
             }
-
             deleteSessionCoroutine(body)
-
         }
         return view
     }
@@ -61,12 +58,13 @@ class ProfileFragment: Fragment(), CoroutineScope {
         job.cancel()
     }
 
+    /*
     private fun deleteSession(body: JsonObject) {
         RetrofitService.getMovieApi()
             .deleteSession(RetrofitService.getApiKey(),body).enqueue(object :
                 Callback<JsonObject> {
                 override fun onFailure(call: Call<JsonObject>, t: Throwable) {
-                    TODO("not implemented")
+
                 }
                 override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                     if(response.isSuccessful){
@@ -75,6 +73,7 @@ class ProfileFragment: Fragment(), CoroutineScope {
                 }
             })
     }
+     */
 
     private fun deleteSessionCoroutine(body: JsonObject) {
         launch {
@@ -87,9 +86,9 @@ class ProfileFragment: Fragment(), CoroutineScope {
         }
     }
 
-    private fun sayGoodBye(){
+    private fun sayGoodBye() {
         val intent = Intent(this.activity, LoginActivity::class.java)
-        val sharedPreference: SharedPreferences =  this.activity!!.getSharedPreferences("CURRENT_USER", Context.MODE_PRIVATE)
+        val sharedPreference: SharedPreferences = this.activity!!.getSharedPreferences("CURRENT_USER", Context.MODE_PRIVATE)
         sharedPreference.edit().remove("currentUser").commit()
         Toast.makeText(this.context, "GoodBye, " + CurrentUser.user!!.userName + "!", Toast.LENGTH_SHORT).show()
         startActivity(intent)

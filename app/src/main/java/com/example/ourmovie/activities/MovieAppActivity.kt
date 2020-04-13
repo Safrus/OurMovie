@@ -16,48 +16,42 @@ import com.example.ourmovie.fragments.ProfileFragment
 import com.example.ourmovie.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MovieAppActivity : AppCompatActivity() {
+class MovieAppActivity: AppCompatActivity() {
 
-    private var filmsFragment: Fragment =
-        FilmsFragment()
-    private var favoriteMoviesFragment: Fragment =
-        FavoriteMoviesFragment()
-    private var profileFragment: Fragment =
-        ProfileFragment()
+    private var filmsFragment: Fragment = FilmsFragment()
+    private var favoriteMoviesFragment: Fragment = FavoriteMoviesFragment()
+    private var profileFragment: Fragment = ProfileFragment()
 
     private var fragmentList: MutableList<Fragment> = ArrayList()
 
-    var fragmentManager: FragmentManager?=null
-    var transaction : FragmentTransaction?=null
+    var fragmentManager: FragmentManager? = null
+    var transaction: FragmentTransaction? = null
 
     private lateinit var pager: CustomViewPager
-    var pagerAdapter: PagerAdapter?=null
+    var pagerAdapter: PagerAdapter? = null
 
     private val navListener: BottomNavigationView.OnNavigationItemSelectedListener =
         object : BottomNavigationView.OnNavigationItemSelectedListener {
             override fun onNavigationItemSelected(@NonNull menuItem: MenuItem): Boolean {
                 transaction = fragmentManager?.beginTransaction()
                 pagerAdapter?.notifyDataSetChanged()
-
                 when (menuItem.getItemId()) {
-                    R.id.nav_films -> pager.setCurrentItem(0,false)
+                    R.id.nav_films -> pager.setCurrentItem(0, false)
                     R.id.nav_favorites -> pager?.setCurrentItem(1, false)
-                    R.id.nav_profile -> pager?.setCurrentItem(2,false)
+                    R.id.nav_profile -> pager?.setCurrentItem(2, false)
                 }
                 return false
             }
         }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_movie_app)
         fragmentManager = supportFragmentManager
 
-
         var bottomNavigation: BottomNavigationView = findViewById(R.id.bottom_navigation)
 
-        bottomNavigation.setOnNavigationItemSelectedListener ( navListener )
+        bottomNavigation.setOnNavigationItemSelectedListener(navListener)
 
         fragmentList.add(filmsFragment)
         fragmentList.add(favoriteMoviesFragment)
@@ -65,14 +59,7 @@ class MovieAppActivity : AppCompatActivity() {
 
         pager = findViewById(R.id.container)
         pager.setSwipable(false)
-        pagerAdapter =
-            SlidePagerAdapter(
-                supportFragmentManager,
-                fragmentList
-            )
+        pagerAdapter = SlidePagerAdapter(supportFragmentManager, fragmentList)
         pager.adapter = pagerAdapter
-        pager?.adapter = pagerAdapter
-
     }
-
 }

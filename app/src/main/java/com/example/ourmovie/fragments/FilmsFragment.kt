@@ -52,27 +52,19 @@ class FilmsFragment: Fragment(), MovieAdapter.RecyclerViewItemClick, CoroutineSc
             .into(option)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view: View = inflater!!.inflate(R.layout.films_fragment,container,false)
         recyclerView = view.findViewById(R.id.favoriteRecyclerView)
-        recyclerView.layoutManager =
-            LinearLayoutManager(this.activity, LinearLayoutManager.VERTICAL, false)
+        recyclerView.layoutManager = LinearLayoutManager(this.activity, LinearLayoutManager.VERTICAL, false)
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
 
         swipeRefreshLayout.setOnRefreshListener {
             movieAdapter?.clearAll()
-            getMovies()
+            getMoviesCoroutine()
         }
 
         movieAdapter = MovieAdapter(itemClickListener = this)
         recyclerView.adapter = movieAdapter
-
-        //getMovies()
 
         getMoviesCoroutine()
 
@@ -84,17 +76,16 @@ class FilmsFragment: Fragment(), MovieAdapter.RecyclerViewItemClick, CoroutineSc
         job.cancel()
     }
 
+    /*
     private fun getMovies() {
         swipeRefreshLayout.isRefreshing = true
         RetrofitService.getMovieApi().getMovieList(
             RetrofitService.getApiKey()
         ).enqueue(object :
             Callback<MovieResponse> {
-
             override fun onFailure(call: Call<MovieResponse>, t: Throwable) {
                 swipeRefreshLayout.isRefreshing = false
             }
-
             override fun onResponse(
                 call: Call<MovieResponse>,
                 response: Response<MovieResponse>
@@ -109,6 +100,7 @@ class FilmsFragment: Fragment(), MovieAdapter.RecyclerViewItemClick, CoroutineSc
             }
         })
     }
+    */
 
     private fun getMoviesCoroutine() {
         launch {
@@ -131,5 +123,4 @@ class FilmsFragment: Fragment(), MovieAdapter.RecyclerViewItemClick, CoroutineSc
         intent.putExtra("movie_id", item.movieId)
         startActivity(intent)
     }
-
 }

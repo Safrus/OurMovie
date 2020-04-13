@@ -6,29 +6,30 @@ import android.view.MotionEvent
 import androidx.viewpager.widget.ViewPager
 
 class CustomViewPager: ViewPager {
+
     private var swipable = false
 
-    constructor(context:Context?):super(context!!){}
-    constructor(context:Context?, attrs: AttributeSet?):super(
-        context!!,
+    constructor(context: Context): super(context)
+    constructor(context: Context, attrs: AttributeSet): super(
+        context,
         attrs
     ){
         swipable = true
     }
 
-    override fun onTouchEvent(event: MotionEvent):Boolean{
-        return if(swipable){
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        return if (swipable) {
             super.onTouchEvent(event)
-        }else{
+        } else {
             false
         }
     }
 
-    override fun onInterceptTouchEvent(ev:MotionEvent):Boolean{
-        return if(swipable) super.onInterceptTouchEvent(ev) else false
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        return if (swipable) super.onInterceptTouchEvent(ev) else false
     }
 
-    fun setSwipable(swipe:Boolean){
+    fun setSwipable(swipe: Boolean) {
         swipable = swipe
     }
 }

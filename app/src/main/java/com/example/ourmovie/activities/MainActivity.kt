@@ -39,20 +39,18 @@ class MainActivity: AppCompatActivity(), CoroutineScope {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val sharedPref: SharedPreferences =  this.getSharedPreferences("CURRENT_USER", Context.MODE_PRIVATE)
+        val sharedPref: SharedPreferences = this.getSharedPreferences("CURRENT_USER", Context.MODE_PRIVATE)
         val gson = Gson()
-        var json: String? = sharedPref.getString("currentUser",null)
+        var json: String? = sharedPref.getString("currentUser", null)
         var type: Type = object : TypeToken<AccountResponse>() {}.type
         CurrentUser.user = gson.fromJson<AccountResponse>(json, type)
 
-
-        if (CurrentUser.user !=null && CurrentUser.user!!.sessionId!=null) {
+        if (CurrentUser.user != null && CurrentUser.user!!.sessionId != null) {
             getAccountCoroutine(CurrentUser.user!!.sessionId.toString())
         } else {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
         }
-
         progressBar = findViewById(R.id.progressBar)
     }
 
@@ -61,17 +59,17 @@ class MainActivity: AppCompatActivity(), CoroutineScope {
         job.cancel()
     }
 
-    private fun getAccount(session:String?){
+    /*
+    private fun getAccount(session: String?) {
         var accountResponse: AccountResponse?
 
         RetrofitService.getMovieApi()
-            .getAccount(RetrofitService.getApiKey(),session!!).enqueue(object :
+            .getAccount(RetrofitService.getApiKey(), session!!).enqueue(object :
                 Callback<JsonObject> {
                 override fun onFailure(call: Call<JsonObject>, t: Throwable) {
                     progressBar.visibility = View.GONE
                     Log.d("My_token_failure", t.toString())
                 }
-
                 override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                     var gson = Gson()
                     if (response.isSuccessful) {
@@ -85,9 +83,9 @@ class MainActivity: AppCompatActivity(), CoroutineScope {
                         }
                     }
                 }
-
             })
     }
+     */
 
     private fun getAccountCoroutine(session: String?) {
         launch {
@@ -113,7 +111,7 @@ class MainActivity: AppCompatActivity(), CoroutineScope {
 
     private fun welcome(user: AccountResponse, session: String?) {
         CurrentUser.user = user
-        CurrentUser.user!!.sessionId  = session;
+        CurrentUser.user!!.sessionId  = session
         val intent = Intent(this, MovieAppActivity::class.java)
         startActivity(intent)
     }
@@ -122,5 +120,4 @@ class MainActivity: AppCompatActivity(), CoroutineScope {
         val intent = Intent(this, MovieAppActivity::class.java)
         startActivity(intent)
     }
-
 }

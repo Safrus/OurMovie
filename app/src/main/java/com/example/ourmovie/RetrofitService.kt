@@ -12,8 +12,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import java.util.concurrent.TimeUnit
 
-//for pull request
-
 object RetrofitService {
 
     private const val BASE_URL = "https://api.themoviedb.org/3/"
@@ -83,7 +81,8 @@ interface MovieApi {
     @GET("movie/{id}")
     suspend fun getMovieByIdCoroutine(@Path("id") id: Int, @Query("api_key") apiKey: String?): Response<JsonObject>
 
-    //Callbacks
+    /*
+    Callbacks
 
     @GET("authentication/token/new")
     fun getNewToken(@Query("api_key") apiKey: String): Call<JsonObject>
@@ -111,4 +110,5 @@ interface MovieApi {
 
     @GET("movie/{id}")
     fun getMovieById(@Path("id") id: Int, @Query("api_key") apiKey: String?): Call<JsonObject>
+     */
 }
