@@ -18,18 +18,16 @@ class FavoriteMovieAdapter(
 
 ) : RecyclerView.Adapter<FavoriteMovieAdapter.FavoriteMovieViewHolder>() {
 
-    private var mContext: Context? = null
+    private var context: Context? = null
 
-    val baseImageUrl:String = "https://image.tmdb.org/t/p/w500"
+    val baseImageUrl: String = "https://image.tmdb.org/t/p/w500"
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoriteMovieViewHolder {
-        this.mContext = parent.context
+        this.context = parent.context
 
         return FavoriteMovieViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_favorite_movie,
-                parent,
-                false
+                R.layout.item_favorite_movie, parent, false
             )
         )
     }
@@ -37,24 +35,23 @@ class FavoriteMovieAdapter(
     override fun onBindViewHolder(holder: FavoriteMovieViewHolder, position: Int) {
         val movie = list!!.get(position)
 
-        if(movie.posterPath != null){
-            Glide.with(mContext!!)
+        if (movie.posterPath != null) {
+            Glide.with(context!!)
                 .load(baseImageUrl + movie.posterPath)
                 .into(holder.ivMoviePoster)
         }
 
-        if(movie.title != null){
+        if (movie.title != null) {
             holder.tvTitle.setText(movie.title)
         }
 
-        if(movie.overview != null){
+        if (movie.overview != null) {
             holder.tvOverview.setText(movie.overview)
         }
 
-        holder.itemView.setOnClickListener{
+        holder.itemView.setOnClickListener {
             itemClickListener?.itemClick(movie.movieId!!, movie!!)
         }
-
     }
 
     fun clearAll() {
@@ -62,15 +59,13 @@ class FavoriteMovieAdapter(
         notifyDataSetChanged()
     }
 
-
-    inner class FavoriteMovieViewHolder(itemView: View):RecyclerView.ViewHolder(itemView){
+    inner class FavoriteMovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val ivMoviePoster: ImageView = itemView.findViewById(R.id.movie_poster)
         val tvTitle: TextView = itemView.findViewById(R.id.movie_title)
         val tvOverview: TextView = itemView.findViewById(R.id.movie_overview)
     }
 
     interface RecyclerViewItemClick {
-
         fun itemClick(position: Int, item: Movie)
     }
 

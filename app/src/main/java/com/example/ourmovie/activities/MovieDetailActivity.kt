@@ -26,14 +26,14 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
 
     private lateinit var progressBar: ProgressBar
     private lateinit var tvTitle: TextView
-    private lateinit var ivDivider:ImageView
-    private lateinit var ivMoviePoster:ImageView
+    private lateinit var ivDivider: ImageView
+    private lateinit var ivMoviePoster: ImageView
     private lateinit var tvRating: TextView
-    private lateinit var tvRatingText:TextView
-    private lateinit var tvRuntime:TextView
-    private lateinit var tvRuntimeText:TextView
-    private lateinit var tvOverviewText:TextView
-    private lateinit var ivLike:ImageView
+    private lateinit var tvRatingText: TextView
+    private lateinit var tvRuntime: TextView
+    private lateinit var tvRuntimeText: TextView
+    private lateinit var tvOverviewText: TextView
+    private lateinit var ivLike: ImageView
     private var isFavorite = false
 
     private val job = Job()
@@ -41,7 +41,7 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-    val baseImageUrl:String = "https://image.tmdb.org/t/p/w500"
+    val baseImageUrl: String = "https://image.tmdb.org/t/p/w500"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +66,7 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
 
         val goBack: ImageButton = findViewById(R.id.back)
 
-        goBack.setOnClickListener({ finish() })
+        goBack.setOnClickListener {finish()}
     }
 
     override fun onDestroy() {
@@ -74,12 +74,11 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
         job.cancel()
     }
 
+    /*
     private fun getMovie(id: Int) {
-
         RetrofitService.getMovieApi()
             .getMovieById(id, RetrofitService.getApiKey()).enqueue(object :
                 Callback<JsonObject> {
-
                 override fun onFailure(call: Call<JsonObject>, t: Throwable) {
                     progressBar.visibility = View.GONE
                 }
@@ -88,42 +87,39 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
                     Log.d("My_movie", response.body().toString())
                     if (response.isSuccessful) {
                         progressBar.visibility = View.GONE
-                        val movie: Movie = gson.fromJson(response.body(),
-                            Movie::class.java)
+                        val movie: Movie = gson.fromJson(response.body(), Movie::class.java)
                         if (movie != null) {
                             tvTitle.text = movie.title
                             tvRating.text = "Rating"
-                            tvRatingText.text = movie.rating.toString()+" / 10"
+                            tvRatingText.text = movie.rating.toString() + " / 10"
                             tvRuntime.text = "Runtime"
-                            tvRuntimeText.text= movie.runtime.toString()+" minutes"
-                            tvOverviewText.text=movie.overview
+                            tvRuntimeText.text = movie.runtime.toString() + " minutes"
+                            tvOverviewText.text = movie.overview
 
-                            for(fm in CurrentUser.favoritList!!){
-                                if(movie.title.equals(fm.title)){
+                            for (fm in CurrentUser.favoritList!!) {
+                                if (movie.title.equals(fm.title)) {
                                     isFavorite = true
                                 }
                             }
 
-                            if(isFavorite){
+                            if (isFavorite) {
                                 Glide.with(this@MovieDetailActivity)
                                     .load(R.drawable.redlike)
                                     .into(ivLike)
-                            }
-                            else{
+                            } else {
                                 Glide.with(this@MovieDetailActivity)
                                     .load(R.drawable.like)
                                     .into(ivLike)
                             }
 
-
-                            if(movie.posterPath != null){
+                            if (movie.posterPath != null) {
                                 Glide.with(this@MovieDetailActivity)
                                     .load(baseImageUrl + movie.posterPath)
                                     .into(ivMoviePoster)
                             }
 
-                            ivLike.setOnClickListener(){
-                                if(isFavorite){
+                            ivLike.setOnClickListener{
+                                if (isFavorite) {
                                     val body = JsonObject().apply {
                                         addProperty("media_type", "movie")
                                         addProperty("media_id", movie.movieId)
@@ -135,8 +131,7 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
                                         .into(ivLike)
 
                                     markFavorite(body)
-                                }
-                                else{
+                                } else {
                                     val body = JsonObject().apply {
                                         addProperty("media_type", "movie")
                                         addProperty("media_id", movie.movieId)
@@ -149,14 +144,13 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
 
                                     markFavorite(body)
                                 }
-
                             }
                         }
                     }
-
                 }
             })
     }
+     */
 
     private fun getMovieCoroutine(id: Int) {
         launch {
@@ -174,7 +168,7 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
                     tvRuntimeText.text = movie.runtime.toString() + " minutes"
                     tvOverviewText.text = movie.overview
 
-                    for(fm in CurrentUser.favoritList!!) {
+                    for (fm in CurrentUser.favoritList!!) {
                         if (movie.title.equals(fm.title)) {
                             isFavorite = true
                         }
@@ -196,7 +190,7 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
                             .into(ivMoviePoster)
                     }
 
-                    ivLike.setOnClickListener(){
+                    ivLike.setOnClickListener {
                         if (isFavorite) {
                             val body = JsonObject().apply {
                                 addProperty("media_type", "movie")
@@ -208,7 +202,7 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
                                 .load(R.drawable.like)
                                 .into(ivLike)
 
-                            markFavorite(body)
+                            markFavoriteCoroutine(body)
                         } else {
                             val body = JsonObject().apply {
                                 addProperty("media_type", "movie")
@@ -232,6 +226,7 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
         }
     }
 
+    /*
    private fun markFavorite(body: JsonObject) {
         var favResponse: FavoriteResponse?
         RetrofitService.getMovieApi().markAsFavorite(
@@ -239,9 +234,8 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
             RetrofitService.getApiKey(), CurrentUser.user!!.sessionId.toString(), body).enqueue(object :
             Callback<JsonObject> {
             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
-                TODO("not implemented")
-            }
 
+            }
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                 var gson = Gson()
                 favResponse = gson.fromJson(response.body(), FavoriteResponse::class.java)
@@ -251,6 +245,7 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
             }
         })
     }
+     */
 
     private fun markFavoriteCoroutine(body: JsonObject) {
         launch {
@@ -268,9 +263,9 @@ class MovieDetailActivity: AppCompatActivity(), CoroutineScope {
         }
     }
 
-    private fun notify(favResponse: FavoriteResponse){
+    private fun notify(favResponse: FavoriteResponse) {
         val status_code = favResponse!!.statusCode
-        if(status_code==0){
+        if (status_code == 0) {
             Toast.makeText(this, favResponse.toString(), Toast.LENGTH_SHORT).show()
         }
     }
