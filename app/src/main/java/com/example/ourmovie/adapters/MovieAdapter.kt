@@ -42,11 +42,11 @@ class MovieAdapter(
         }
 
         if (movie.title != null) {
-            holder.tvTitle.setText(movie.title)
+            holder.tvTitle.text = movie.title
         }
 
         if (movie.overview != null) {
-           holder.tvOverview.setText(movie.overview)
+            holder.tvOverview.text = movie.overview
         }
 
         holder.itemView.setOnClickListener {
