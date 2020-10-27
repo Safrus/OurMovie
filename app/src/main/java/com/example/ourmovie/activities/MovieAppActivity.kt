@@ -34,17 +34,15 @@ class MovieAppActivity: AppCompatActivity() {
     var pagerAdapter: PagerAdapter? = null
 
     private val navListener: BottomNavigationView.OnNavigationItemSelectedListener =
-        object : BottomNavigationView.OnNavigationItemSelectedListener {
-            override fun onNavigationItemSelected(@NonNull menuItem: MenuItem): Boolean {
-                transaction = fragmentManager?.beginTransaction()
-                pagerAdapter?.notifyDataSetChanged()
-                when (menuItem.getItemId()) {
-                    R.id.nav_films -> pager.setCurrentItem(0, false)
-                    R.id.nav_favorites -> pager?.setCurrentItem(1, false)
-                    R.id.nav_profile -> pager?.setCurrentItem(2, false)
-                }
-                return false
+        BottomNavigationView.OnNavigationItemSelectedListener { menuItem ->
+            transaction = fragmentManager?.beginTransaction()
+            pagerAdapter?.notifyDataSetChanged()
+            when (menuItem.itemId) {
+                R.id.nav_films -> pager.setCurrentItem(0, false)
+                R.id.nav_favorites -> pager.setCurrentItem(1, false)
+                R.id.nav_profile -> pager.setCurrentItem(2, false)
             }
+            false
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +50,7 @@ class MovieAppActivity: AppCompatActivity() {
         setContentView(R.layout.activity_movie_app)
         fragmentManager = supportFragmentManager
 
-        var bottomNavigation: BottomNavigationView = findViewById(R.id.bottom_navigation)
+        val bottomNavigation: BottomNavigationView = findViewById(R.id.bottom_navigation)
 
         bottomNavigation.setOnNavigationItemSelectedListener(navListener)
 

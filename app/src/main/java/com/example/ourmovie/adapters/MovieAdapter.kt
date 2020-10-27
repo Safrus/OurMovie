@@ -50,7 +50,7 @@ class MovieAdapter(
         }
 
         holder.itemView.setOnClickListener {
-            itemClickListener?.itemClick(movie.movieId!!, movie!!)
+            itemClickListener?.itemClick(movie.movieId!!, movie)
         }
 
     }
